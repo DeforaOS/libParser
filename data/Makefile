@@ -14,6 +14,7 @@ libParser.pc: libParser.pc.in ../config.sh
 
 clean:
 	$(RM) -- $(libParser.pc_OBJS)
+	./pkgconfig.sh -c -P "$(PREFIX)" -- "libParser.pc"
 
 distclean: clean
 	$(RM) -- $(TARGETS)
