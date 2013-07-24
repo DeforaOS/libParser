@@ -42,8 +42,8 @@ distclean: clean
 
 install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(PREFIX)/lib
-	$(INSTALL) -m 0644 -- libParser.a $(DESTDIR)$(PREFIX)/lib/libParser.a
-	$(INSTALL) -m 0755 -- libParser.so.0.0 $(DESTDIR)$(PREFIX)/lib/libParser.so.0.0
+	$(INSTALL) -m 0644 libParser.a $(DESTDIR)$(PREFIX)/lib/libParser.a
+	$(INSTALL) -m 0755 libParser.so.0.0 $(DESTDIR)$(PREFIX)/lib/libParser.so.0.0
 	$(LN) -s -- libParser.so.0.0 $(DESTDIR)$(PREFIX)/lib/libParser.so.0
 	$(LN) -s -- libParser.so.0.0 $(DESTDIR)$(PREFIX)/lib/libParser.so
 

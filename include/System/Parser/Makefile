@@ -15,7 +15,7 @@ distclean: clean
 
 install:
 	$(MKDIR) $(DESTDIR)$(PREFIX)/include/System/Parser
-	$(INSTALL) -m 0644 -- XML.h $(DESTDIR)$(PREFIX)/include/System/Parser/XML.h
+	$(INSTALL) -m 0644 XML.h $(DESTDIR)$(PREFIX)/include/System/Parser/XML.h
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/include/System/Parser/XML.h
