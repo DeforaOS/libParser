@@ -3,7 +3,7 @@ includedir=${prefix}/include
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 
-Name: libParser
+Name: @PACKAGE@
 Description: DeforaOS System parsing library
 Version: @VERSION@
 Requires: libSystem
