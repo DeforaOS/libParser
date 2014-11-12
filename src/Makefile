@@ -20,7 +20,7 @@ all: $(TARGETS)
 
 libParser_OBJS = xml.o
 libParser_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
-libParser_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) -L $(PREFIX)/lib -Wl,-rpath,$(PREFIX)/lib -lSystem
+libParser_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) -L$(PREFIX)/lib -Wl,-rpath,$(PREFIX)/lib -lSystem
 
 libParser.a: $(libParser_OBJS)
 	$(AR) -rc libParser.a $(libParser_OBJS)
