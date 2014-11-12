@@ -3,7 +3,7 @@ PREFIX	= /usr/local
 DESTDIR	=
 LIBDIR	= $(PREFIX)/lib
 CC	= cc
-CPPFLAGSF= -I ../include -I $(PREFIX)/include
+CPPFLAGSF= -I ../include
 CPPFLAGS=
 CFLAGSF	= -W -fPIC
 CFLAGS	= -Wall -g -O2 -pedantic
@@ -19,8 +19,8 @@ INSTALL	= install
 all: $(TARGETS)
 
 libParser_OBJS = xml.o
-libParser_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
-libParser_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) -L$(PREFIX)/lib -Wl,-rpath,$(PREFIX)/lib -lSystem
+libParser_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) `pkg-config --cflags libSystem`
+libParser_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs libSystem`
 
 libParser.a: $(libParser_OBJS)
 	$(AR) -rc libParser.a $(libParser_OBJS)
