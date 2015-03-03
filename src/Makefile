@@ -1,4 +1,5 @@
-TARGETS	= libParser.a libParser.so.0.0 libParser.so.0 libParser.so
+TARGETS	= $(OBJDIR)libParser.a $(OBJDIR)libParser.so.0.0 $(OBJDIR)libParser.so.0 $(OBJDIR)libParser.so
+OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
 LIBDIR	= $(PREFIX)/lib
@@ -18,21 +19,21 @@ INSTALL	= install
 
 all: $(TARGETS)
 
-libParser_OBJS = xml.o
+libParser_OBJS = $(OBJDIR)xml.o
 libParser_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) `pkg-config --cflags libSystem`
 libParser_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs libSystem`
 
-libParser.a: $(libParser_OBJS)
-	$(AR) -rc libParser.a $(libParser_OBJS)
-	$(RANLIB) libParser.a
+$(OBJDIR)libParser.a: $(libParser_OBJS)
+	$(AR) -rc $(OBJDIR)libParser.a $(libParser_OBJS)
+	$(RANLIB) $(OBJDIR)libParser.a
 
-libParser.so.0.0 libParser.so.0 libParser.so: $(libParser_OBJS)
-	$(CCSHARED) -o libParser.so.0.0 -Wl,-soname,libParser.so.0 $(libParser_OBJS) $(libParser_LDFLAGS)
-	$(LN) -s -- libParser.so.0.0 libParser.so.0
-	$(LN) -s -- libParser.so.0.0 libParser.so
+$(OBJDIR)libParser.so.0.0 $(OBJDIR)libParser.so.0 $(OBJDIR)libParser.so: $(libParser_OBJS)
+	$(CCSHARED) -o $(OBJDIR)libParser.so.0.0 -Wl,-soname,libParser.so.0 $(libParser_OBJS) $(libParser_LDFLAGS)
+	$(LN) -s -- libParser.so.0.0 $(OBJDIR)libParser.so.0
+	$(LN) -s -- libParser.so.0.0 $(OBJDIR)libParser.so
 
-xml.o: xml.c ../include/System/Parser/XML.h
-	$(CC) $(libParser_CFLAGS) -c xml.c
+$(OBJDIR)xml.o: xml.c ../include/System/Parser/XML.h
+	$(CC) $(libParser_CFLAGS) -o $(OBJDIR)xml.o -c xml.c
 
 clean:
 	$(RM) -- $(libParser_OBJS)
@@ -42,8 +43,8 @@ distclean: clean
 
 install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(PREFIX)/lib
-	$(INSTALL) -m 0644 libParser.a $(DESTDIR)$(PREFIX)/lib/libParser.a
-	$(INSTALL) -m 0755 libParser.so.0.0 $(DESTDIR)$(PREFIX)/lib/libParser.so.0.0
+	$(INSTALL) -m 0644 $(OBJDIR)libParser.a $(DESTDIR)$(PREFIX)/lib/libParser.a
+	$(INSTALL) -m 0755 $(OBJDIR)libParser.so.0.0 $(DESTDIR)$(PREFIX)/lib/libParser.so.0.0
 	$(LN) -s -- libParser.so.0.0 $(DESTDIR)$(PREFIX)/lib/libParser.so.0
 	$(LN) -s -- libParser.so.0.0 $(DESTDIR)$(PREFIX)/lib/libParser.so
 

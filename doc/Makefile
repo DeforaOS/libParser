@@ -1,5 +1,6 @@
 SUBDIRS	= gtkdoc
-TARGETS	= gtkdoc/libParser.types gtkdoc/tmpl.stamp gtkdoc/sgml.stamp gtkdoc/html.stamp
+TARGETS	= $(OBJDIR)gtkdoc/libParser.types $(OBJDIR)gtkdoc/tmpl.stamp $(OBJDIR)gtkdoc/sgml.stamp $(OBJDIR)gtkdoc/html.stamp
+OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
 RM	= rm -f
@@ -11,19 +12,23 @@ INSTALL	= install
 all: subdirs $(TARGETS)
 
 subdirs:
-	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE)) || exit; done
+	@for i in $(SUBDIRS); do (cd "$$i" && \
+		if [ -n "$(OBJDIR)" ]; then \
+		([ -d "$(OBJDIR)$$i" ] || $(MKDIR) -- "$(OBJDIR)$$i") && \
+		$(MAKE) OBJDIR="$(OBJDIR)$$i/"; \
+		else $(MAKE); fi) || exit; done
 
-gtkdoc/libParser.types:
-	./gtkdoc.sh -P "$(PREFIX)" -- "gtkdoc/libParser.types"
+$(OBJDIR)gtkdoc/libParser.types:
+	./gtkdoc.sh -P "$(PREFIX)" -- "$(OBJDIR)gtkdoc/libParser.types"
 
-gtkdoc/tmpl.stamp: gtkdoc/libParser.types
-	./gtkdoc.sh -P "$(PREFIX)" -- "gtkdoc/tmpl.stamp"
+$(OBJDIR)gtkdoc/tmpl.stamp: gtkdoc/libParser.types
+	./gtkdoc.sh -P "$(PREFIX)" -- "$(OBJDIR)gtkdoc/tmpl.stamp"
 
-gtkdoc/sgml.stamp: gtkdoc/tmpl.stamp
-	./gtkdoc.sh -P "$(PREFIX)" -- "gtkdoc/sgml.stamp"
+$(OBJDIR)gtkdoc/sgml.stamp: gtkdoc/tmpl.stamp
+	./gtkdoc.sh -P "$(PREFIX)" -- "$(OBJDIR)gtkdoc/sgml.stamp"
 
-gtkdoc/html.stamp: gtkdoc/libParser-docs.xml gtkdoc/sgml.stamp
-	./gtkdoc.sh -P "$(PREFIX)" -- "gtkdoc/html.stamp"
+$(OBJDIR)gtkdoc/html.stamp: gtkdoc/libParser-docs.xml gtkdoc/sgml.stamp
+	./gtkdoc.sh -P "$(PREFIX)" -- "$(OBJDIR)gtkdoc/html.stamp"
 
 clean:
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) clean) || exit; done
@@ -44,7 +49,7 @@ distclean:
 
 install: $(TARGETS)
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) install) || exit; done
-	./gtkdoc.sh -P "$(DESTDIR)$(PREFIX)" -i -- "gtkdoc/html.stamp"
+	./gtkdoc.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)gtkdoc/html.stamp"
 
 uninstall:
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) uninstall) || exit; done

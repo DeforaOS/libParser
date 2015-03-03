@@ -1,4 +1,5 @@
-TARGETS	= libParser.pc
+TARGETS	= $(OBJDIR)libParser.pc
+OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
 RM	= rm -f
@@ -9,8 +10,8 @@ INSTALL	= install
 
 all: $(TARGETS)
 
-libParser.pc: libParser.pc.in ../config.sh
-	./pkgconfig.sh -P "$(PREFIX)" -- "libParser.pc"
+$(OBJDIR)libParser.pc: libParser.pc.in ../config.sh
+	./pkgconfig.sh -P "$(PREFIX)" -- "$(OBJDIR)libParser.pc"
 
 clean:
 	$(RM) -- $(libParser.pc_OBJS)
@@ -20,7 +21,7 @@ distclean: clean
 	$(RM) -- $(TARGETS)
 
 install: $(TARGETS)
-	./pkgconfig.sh -P "$(DESTDIR)$(PREFIX)" -i -- "libParser.pc"
+	./pkgconfig.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)libParser.pc"
 
 uninstall:
 	./pkgconfig.sh -P "$(DESTDIR)$(PREFIX)" -u -- "libParser.pc"
