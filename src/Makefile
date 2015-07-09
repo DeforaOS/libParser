@@ -27,9 +27,13 @@ $(OBJDIR)libParser.a: $(libParser_OBJS)
 	$(AR) -rc $(OBJDIR)libParser.a $(libParser_OBJS)
 	$(RANLIB) $(OBJDIR)libParser.a
 
-$(OBJDIR)libParser.so.0.0 $(OBJDIR)libParser.so.0 $(OBJDIR)libParser.so: $(libParser_OBJS)
+$(OBJDIR)libParser.so.0.0: $(libParser_OBJS)
 	$(CCSHARED) -o $(OBJDIR)libParser.so.0.0 -Wl,-soname,libParser.so.0 $(libParser_OBJS) $(libParser_LDFLAGS)
+
+$(OBJDIR)libParser.so.0: $(OBJDIR)libParser.so.0.0
 	$(LN) -s -- libParser.so.0.0 $(OBJDIR)libParser.so.0
+
+$(OBJDIR)libParser.so: $(OBJDIR)libParser.so.0.0
 	$(LN) -s -- libParser.so.0.0 $(OBJDIR)libParser.so
 
 $(OBJDIR)xml.o: xml.c ../include/System/Parser/XML.h
