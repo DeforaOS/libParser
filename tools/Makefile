@@ -8,7 +8,8 @@ CC	= cc
 CPPFLAGSF= -I ../include
 CPPFLAGS=
 CFLAGSF	= -W `pkg-config --cflags libSystem`
-CFLAGS	= -Wall -g -O2 -pedantic -fstack-protector
+CFLAGS	= -Wall -g -O2 -pedantic -fPIC -fstack-protector
+LDFLAGS	= `pkg-config --libs libSystem`
 RM	= rm -f
 LN	= ln -f
 MKDIR	= mkdir -m 0755 -p
@@ -19,7 +20,7 @@ all: $(TARGETS)
 
 xml_OBJS = $(OBJDIR)xml.o
 xml_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
-xml_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) -L../src `pkg-config --libs libSystem` -lParser
+xml_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) -L../src -lParser
 
 $(OBJDIR)xml: $(xml_OBJS)
 	$(CC) -o $(OBJDIR)xml $(xml_OBJS) $(xml_LDFLAGS)
