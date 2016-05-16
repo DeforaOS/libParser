@@ -21,8 +21,20 @@ libParser depends on the following software components:
   <http://www.defora.org/os/project/16/configure>
 
 
-Compiling libParser
+Configuring libParser
 ---------------------
+
+Before being able to build libParser, it is necessary to generate Makefiles
+with `configure(1)`. It should be enough to run this tool as follows:
+
+    $ configure
+
+Please refer to the documentation of DeforaOS configure for further
+instructions.
+
+
+Compiling libParser
+-------------------
 
 It is then possible to build the project with `make(1)` as usual. The following
 command should therefore be enough:
