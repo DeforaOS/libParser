@@ -33,6 +33,17 @@ PKGCONFIG="pkg-config$EXEEXT"
 
 
 #functions
+#date
+_date()
+{
+	if [ -n "$SOURCE_EPOCH" ]; then
+		$DATE -d "@$SOURCE_EPOCH" '+%a %b %d %T %Z %Y'
+	else
+		$DATE
+	fi
+}
+
+
 #fail
 _fail()
 {
@@ -110,7 +121,7 @@ target="$1"
 
 tests="pkgconfig.sh"
 
-$DATE > "$target"
+_date > "$target"
 FAILED=
 echo "Performing tests:" 1>&2
 for test in $tests; do
