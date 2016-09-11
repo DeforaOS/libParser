@@ -311,6 +311,8 @@ static int _document_tag_attribute(Token * token, XMLNodeTag * current,
 static int _document_tag_attribute_value(Token * token,
 		XMLAttribute * attribute)
 {
+	if(attribute == NULL)
+		return -1;
 	return _xml_attribute_set_value(attribute, token_get_string(token));
 }
 
