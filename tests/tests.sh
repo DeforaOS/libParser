@@ -119,18 +119,12 @@ target="$1"
 
 [ "$clean" -ne 0 ]						&& exit 0
 
-tests="pkgconfig.sh"
-
 _date > "$target"
 FAILED=
 echo "Performing tests:" 1>&2
-for test in $tests; do
-	_test "$test"
-done
+_test "pkgconfig.sh"
 echo "Expected failures:" 1>&2
-for test in $failures; do
-	_fail "$test"
-done
+_fail "../tools/xml$EXEEXT" "xml-afl-000000.xml"
 if [ -n "$FAILED" ]; then
 	echo "Failed tests:$FAILED" 1>&2
 	exit 2
