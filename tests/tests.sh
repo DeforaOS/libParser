@@ -25,11 +25,11 @@
 
 
 #variables
-PROGNAME="tests.sh"
 [ -n "$OBJDIR" ] || OBJDIR="./"
+PROGNAME="tests.sh"
 #executables
 DATE="date"
-PKGCONFIG="pkg-config"
+PKGCONFIG="pkg-config$EXEEXT"
 
 
 #functions
@@ -106,7 +106,7 @@ if [ $# -ne 1 ]; then
 fi
 target="$1"
 
-[ "$clean" -ne 0 ]			&& exit 0
+[ "$clean" -ne 0 ]						&& exit 0
 
 tests="pkgconfig.sh"
 
