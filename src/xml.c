@@ -386,7 +386,7 @@ static int _xml_inject(XML * xml, char const * string)
 		return -1;
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(%p, \"%s\") => \"%s\"\n", __func__,
-			(void*)xml, string, xml->inject);
+			(void *)xml, string, xml->inject);
 #endif
 	return 0;
 }
