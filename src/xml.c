@@ -516,8 +516,8 @@ static int _xml_callback_tag_attribute(Parser * parser, Token * token, int c,
 	size_t len = 0;
 	char * p;
 
-	if(xml->context != XML_CONTEXT_TAG_ATTRIBUTES || (!isalnum(c)
-				&& c != '"'))
+	if(xml->context != XML_CONTEXT_TAG_ATTRIBUTES
+			|| (!isalnum(c) && c != '"'))
 		return -1;
 	if(c == '"')
 	{
