@@ -300,6 +300,8 @@ static int _document_entity(Token * token, XMLNodeTag * current)
 static int _document_tag_attribute(Token * token, XMLNodeTag * current,
 		XMLAttribute ** attribute)
 {
+	if(current == NULL)
+		return -1;
 	if((*attribute = _xml_attribute_new(token_get_string(token), NULL))
 			== NULL)
 		return -1;
