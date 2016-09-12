@@ -707,6 +707,7 @@ static int _xml_callback_tag_whitespace(Parser * parser, Token * token, int c,
 		void * data)
 {
 	XML * xml = data;
+	(void) token;
 
 	if(!isspace(c))
 		return -1;
