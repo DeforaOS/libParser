@@ -789,13 +789,11 @@ static int _xml_filter_inject(int * c, void * data)
 {
 	XML * xml = data;
 	size_t len;
-	int d;
 
 	if(xml->inject == NULL)
 		return 0;
 	if((len = strlen(xml->inject)) > 0)
 	{
-		d = *c;
 		*c = xml->inject[0];
 		memmove(xml->inject, &xml->inject[1], len--);
 	}
