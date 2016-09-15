@@ -123,7 +123,8 @@ _date > "$target"
 FAILED=
 echo "Performing tests:" 1>&2
 _test "pkgconfig.sh"
-_test "../tools/xml$EXEEXT" "xml-afl-000000.xml"
+[ -z "$PKG_CONFIG_SYSROOT_DIR" ] && _test "../tools/xml$EXEEXT" \
+	"xml-afl-000000.xml"
 echo "Expected failures:" 1>&2
 if [ -n "$FAILED" ]; then
 	echo "Failed tests:$FAILED" 1>&2
