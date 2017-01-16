@@ -25,6 +25,7 @@
 
 
 #variables
+EXEEXT=
 [ -n "$OBJDIR" ] || OBJDIR="./"
 PROGNAME="tests.sh"
 #executables
