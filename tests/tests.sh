@@ -38,7 +38,7 @@ PKGCONFIG="pkg-config$EXEEXT"
 _date()
 {
 	if [ -n "$SOURCE_DATE_EPOCH" ]; then
-		$DATE -d "@$SOURCE_DATE_EPOCH" '+%a %b %d %T %Z %Y'
+		TZ=UTC $DATE -d "@$SOURCE_DATE_EPOCH" '+%a %b %d %T %Z %Y'
 	else
 		$DATE
 	fi
