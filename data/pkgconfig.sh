@@ -1,6 +1,6 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2011-2014 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2011-2020 Pierre Pronchery <khorben@defora.org>
 #
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
@@ -25,22 +25,25 @@
 
 
 #variables
+CONFIGSH="${0%/pkgconfig.sh}/../config.sh"
 PREFIX="/usr/local"
-[ -f "../config.sh" ] && . "../config.sh"
-DEBUG="_debug"
 DEVNULL="/dev/null"
+PROGNAME="pkgconfig.sh"
 #executables
+DEBUG="_debug"
 INSTALL="install -m 0644"
 MKDIR="mkdir -m 0755 -p"
 RM="rm -f"
 SED="sed"
+
+[ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 
 #functions
 #debug
 _debug()
 {
-	echo "$@" 1>&2
+	echo "$@" 1>&3
 	"$@"
 }
 
@@ -48,7 +51,7 @@ _debug()
 #error
 _error()
 {
-	echo "pkgconfig.sh: $@" 1>&2
+	echo "$PROGNAME: $@" 1>&2
 	return 2
 }
 
@@ -56,7 +59,7 @@ _error()
 #usage
 _usage()
 {
-	echo "Usage: pkgconfig.sh [-c|-i|-u][-P prefix] target..." 1>&2
+	echo "Usage: $PROGNAME [-c|-i|-u][-P prefix] target..." 1>&2
 	return 1
 }
 
@@ -65,7 +68,7 @@ _usage()
 clean=0
 install=0
 uninstall=0
-while getopts "ciuP:" name; do
+while getopts "ciuO:P:" name; do
 	case $name in
 		c)
 			clean=1
@@ -78,6 +81,9 @@ while getopts "ciuP:" name; do
 			install=0
 			uninstall=1
 			;;
+		O)
+			export "${OPTARG%%=*}"="${OPTARG#*=}"
+			;;
 		P)
 			PREFIX="$OPTARG"
 			;;
@@ -88,7 +94,7 @@ while getopts "ciuP:" name; do
 	esac
 done
 shift $(($OPTIND - 1))
-if [ $# -eq 0 ]; then
+if [ $# -lt 0 ]; then
 	_usage
 	exit $?
 fi
@@ -102,8 +108,19 @@ if [ -z "$VERSION" ]; then
 	_error "The VERSION variable needs to be set"
 	exit $?
 fi
+[ -z "$BINDIR" ] && BINDIR="$PREFIX/bin"
+[ -z "$DATADIR" ] && DATADIR="$PREFIX/share"
+[ -z "$INCLUDEDIR" ] && INCLUDEDIR="$PREFIX/include"
+[ -z "$LIBDIR" ] && LIBDIR="$PREFIX/lib"
+[ -z "$LIBEXECDIR" ] && LIBEXECDIR="$PREFIX/libexec"
+[ -z "$MANDIR" ] && MANDIR="$DATADIR/man"
+if [ -z "$SYSCONFDIR" ]; then
+	SYSCONFDIR="$PREFIX/etc"
+	[ "$PREFIX" = "/usr" ] && SYSCONFDIR="/etc"
+fi
 
 PKGCONFIG="$PREFIX/lib/pkgconfig"
+exec 3>&1
 while [ $# -gt 0 ]; do
 	target="$1"
 	shift
@@ -121,7 +138,11 @@ while [ $# -gt 0 ]; do
 	if [ "$install" -eq 1 ]; then
 		source="${target#$OBJDIR}"
 		$DEBUG $MKDIR -- "$PKGCONFIG"			|| exit 2
-		$DEBUG $INSTALL "$target" "$PKGCONFIG/$source"	|| exit 2
+		basename="$source"
+		if [ "${source##*/}" != "$source" ]; then
+			basename="${source##*/}"
+		fi
+		$DEBUG $INSTALL "$target" "$PKGCONFIG/$basename"|| exit 2
 		continue
 	fi
 
@@ -130,10 +151,10 @@ while [ $# -gt 0 ]; do
 	if [ "$PREFIX" != "/usr" ]; then
 		RPATH="-Wl,-rpath-link,\${libdir} -Wl,-rpath,\${libdir}"
 		case $(uname -s) in
-			Darwin)
+			"Darwin")
 				RPATH="-Wl,-rpath,\${libdir}"
 				;;
-			SunOS)
+			"SunOS")
 				RPATH="-Wl,-R\${libdir}"
 				;;
 		esac
@@ -142,10 +163,19 @@ while [ $# -gt 0 ]; do
 	#create
 	source="${target#$OBJDIR}"
 	source="${source}.in"
-	$DEBUG $SED -e "s;@PACKAGE@;$PACKAGE;" \
-			-e "s;@VERSION@;$VERSION;" \
-			-e "s;@PREFIX@;$PREFIX;" \
-			-e "s;@RPATH@;$RPATH;" \
+	([ -z "$OBJDIR" ] || $DEBUG $MKDIR -- "${target%/*}")	|| exit 2
+	$DEBUG $SED -e "s;@PACKAGE@;$PACKAGE;g" \
+			-e "s;@VERSION@;$VERSION;g" \
+			-e "s;@PREFIX@;$PREFIX;g" \
+			-e "s;@BINDIR@;$BINDIR;g" \
+			-e "s;@DATADIR@;$DATADIR;g" \
+			-e "s;@INCLUDEDIR@;$INCLUDEDIR;g" \
+			-e "s;@LIBDIR@;$LIBDIR;g" \
+			-e "s;@LIBEXECDIR@;$LIBEXECDIR;g" \
+			-e "s;@MANDIR@;$MANDIR;g" \
+			-e "s;@PWD@;$PWD;g" \
+			-e "s;@RPATH@;$RPATH;g" \
+			-e "s;@SYSCONFDIR@;$SYSCONFDIR;g" \
 			-- "$source" > "$target"
 	if [ $? -ne 0 ]; then
 		$DEBUG $RM -- "$target"
