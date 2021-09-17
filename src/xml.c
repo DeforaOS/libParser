@@ -278,7 +278,7 @@ static int _document_data(Token * token, XMLNodeTag * current)
 	if(current == NULL)
 		return -1;
 	if((string = token_get_string(token)) != NULL)
-		size = string_length(string);
+		size = string_get_length(string);
 	node = _xml_node_new_data(current, string, size);
 	return _xml_node_tag_add_child(current, node);
 }
