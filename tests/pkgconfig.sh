@@ -24,14 +24,18 @@
 
 
 #variables
-PACKAGE="libParser"
+CONFIGSH="${0%/pkgconfig.sh}/../config.sh"
+PACKAGE=
 PKG_CONFIG_PATH="$OBJDIR../data:$PKG_CONFIG_PATH"
 PKG_CONFIG_PATH="${PKG_CONFIG_PATH%:}"
+PROGNAME="pkgconfig.sh"
 #executables
 ECHO="echo"
 PKGCONFIG="pkg-config"
 UNAME="uname"
 [ $($UNAME -s) != "Darwin" ] || ECHO="/bin/echo"
+
+[ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 
 #functions
@@ -49,6 +53,56 @@ _pkgconfig()
 	echo "$output"
 	return $ret
 }
+
+
+#error
+_error()
+{
+	echo "$PROGNAME: $@" 1>&2
+	return 2
+}
+
+
+#usage
+_usage()
+{
+	echo "Usage: $PROGNAME [-c][-P prefix]" 1>&2
+	return 1
+}
+
+
+#main
+clean=0
+while getopts "cO:P:" name; do
+	case "$name" in
+		c)
+			clean=1
+			;;
+		O)
+			export "${OPTARG%%=*}"="${OPTARG#*=}"
+			;;
+		P)
+			#XXX ignored
+			;;
+		?)
+			_usage
+			exit $?
+			;;
+	esac
+done
+shift $((OPTIND - 1))
+if [ $# -ne 0 ]; then
+	_usage
+	exit $?
+fi
+
+if [ -z "$PACKAGE" ]; then
+	_error "PACKAGE is not set"
+	exit $?
+fi
+
+#clean
+[ $clean -ne 0 ] && exit 0
 
 _pkgconfig "EXISTS:" --exists "$PACKAGE"			|| exit 2
 
