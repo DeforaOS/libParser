@@ -28,8 +28,14 @@ PACKAGE="libParser"
 PKG_CONFIG_PATH="$OBJDIR../data:$PKG_CONFIG_PATH"
 PKG_CONFIG_PATH="${PKG_CONFIG_PATH%:}"
 #executables
+ECHO="echo"
 PKGCONFIG="pkg-config"
+UNAME="uname"
+[ $($UNAME -s) != "Darwin" ] || ECHO="/bin/echo"
 
+
+#functions
+#pkgconfig
 _pkgconfig()
 {
 	ret=0
@@ -37,7 +43,7 @@ _pkgconfig()
 	options="$2"
 	packages="$3"
 
-	echo -n "$caption"
+	$ECHO -n "$caption"
 	output=$(PKG_CONFIG_PATH="$PKG_CONFIG_PATH" $PKGCONFIG $options "$packages")
 	ret=$?
 	echo "$output"
