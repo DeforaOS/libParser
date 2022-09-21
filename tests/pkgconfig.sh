@@ -1,6 +1,6 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2016 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2016-2022 Pierre Pronchery <khorben@defora.org>
 #This file is part of DeforaOS Desktop libDesktop
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
