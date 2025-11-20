@@ -1,6 +1,6 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2016-2022 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2016-2025 Pierre Pronchery <khorben@defora.org>
 #This file is part of DeforaOS Desktop libDesktop
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
@@ -23,9 +23,9 @@
 #OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
+
 #variables
 CONFIGSH="${0%/pkgconfig.sh}/../config.sh"
-PACKAGE=
 PKG_CONFIG_PATH="$OBJDIR../data:$PKG_CONFIG_PATH"
 PKG_CONFIG_PATH="${PKG_CONFIG_PATH%:}"
 PROGNAME="pkgconfig.sh"
@@ -33,7 +33,7 @@ PROGNAME="pkgconfig.sh"
 ECHO="echo"
 PKGCONFIG="pkg-config"
 UNAME="uname"
-[ $($UNAME -s) != "Darwin" ] || ECHO="/bin/echo"
+[ "$($UNAME -s)" != "Darwin" ] || ECHO="/bin/echo"
 
 [ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
@@ -41,32 +41,34 @@ UNAME="uname"
 #functions
 #pkgconfig
 _pkgconfig()
-{
+{(
 	ret=0
+
+	_pkgconfig_do "EXISTS:" --exists "$PACKAGE"		|| return 2
+
+	_pkgconfig_do "VERSION:" --modversion "$PACKAGE"	|| ret=3
+	_pkgconfig_do "CFLAGS:	" --cflags "$PACKAGE"		|| ret=4
+	_pkgconfig_do "LIBS:	" --libs "$PACKAGE"		|| ret=5
+	_pkgconfig_do "PROVIDES:" --print-provides "$PACKAGE"	|| ret=6
+	_pkgconfig_do "REQUIRES:" --print-requires "$PACKAGE"	|| ret=7
+	return $ret
+)}
+
+_pkgconfig_do()
+{
 	caption="$1"
 	options="$2"
 	packages="$3"
 
 	$ECHO -n "$caption"
-	output=$(PKG_CONFIG_PATH="$PKG_CONFIG_PATH" $PKGCONFIG $options "$packages")
-	ret=$?
-	echo "$output"
-	return $ret
-}
-
-
-#error
-_error()
-{
-	echo "$PROGNAME: $@" 1>&2
-	return 2
+	PKG_CONFIG_PATH="$PKG_CONFIG_PATH" $PKGCONFIG $options "$packages"
 }
 
 
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME [-c][-P prefix]" 1>&2
+	echo "Usage: $PROGNAME [-c] target..." 1>&2
 	return 1
 }
 
@@ -82,7 +84,7 @@ while getopts "cO:P:" name; do
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
 			;;
 		P)
-			#XXX ignored
+			#XXX ignored for compatibility
 			;;
 		?)
 			_usage
@@ -91,27 +93,24 @@ while getopts "cO:P:" name; do
 	esac
 done
 shift $((OPTIND - 1))
-if [ $# -ne 0 ]; then
+if [ $# -lt 1 ]; then
 	_usage
-	exit $?
-fi
-
-if [ -z "$PACKAGE" ]; then
-	_error "PACKAGE is not set"
 	exit $?
 fi
 
 #clean
 [ $clean -ne 0 ] && exit 0
 
-_pkgconfig "EXISTS:" --exists "$PACKAGE"			|| exit 2
-
+exec 3>&1
 ret=0
+while [ $# -gt 0 ]; do
+	target="$1"
+	dirname="${target%/*}"
+	shift
 
-_pkgconfig "VERSION:" --modversion "$PACKAGE"			|| ret=3
-_pkgconfig "CFLAGS:	" --cflags "$PACKAGE"			|| ret=4
-_pkgconfig "LIBS:	" --libs "$PACKAGE"			|| ret=5
-_pkgconfig "PROVIDES:" --print-provides "$PACKAGE"		|| ret=6
-_pkgconfig "REQUIRES:" --print-requires "$PACKAGE"		|| ret=7
-
+	if [ -n "$dirname" -a "$dirname" != "$target" ]; then
+		$MKDIR -- "$dirname"				|| ret=$?
+	fi
+	_pkgconfig > "$target"					|| ret=$?
+done
 exit $ret
