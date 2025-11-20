@@ -3,3 +3,5 @@
 /pclint.log
 /pkgconfig.log
 /tests.log
+/xml
+/xmllint.log
