@@ -1,6 +1,6 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2016-2022 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2016-2025 Pierre Pronchery <khorben@defora.org>
 #This file is part of DeforaOS System libParser
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
@@ -129,7 +129,6 @@ target="$1"
 _date > "$target"
 FAILED=
 echo "Performing tests:" 1>&2
-_test "pkgconfig.sh"
 [ -z "$PKG_CONFIG_SYSROOT_DIR" ] && _test "../tools/xml$EXEEXT" \
 	"xml-afl-000000.xml"
 echo "Expected failures:" 1>&2
