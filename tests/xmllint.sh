@@ -1,7 +1,7 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2016-2025 Pierre Pronchery <khorben@defora.org>
-#This file is part of DeforaOS System libParser
+#Copyright (c) 2014-2021 Pierre Pronchery <khorben@defora.org>
+#
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
 #
@@ -25,75 +25,89 @@
 
 
 #variables
-EXEEXT=
-[ -n "$OBJDIR" ] || OBJDIR="./"
-PROGNAME="tests.sh"
+CONFIGSH="${0%/xmllint.sh}/../config.sh"
+DEVNULL="/dev/null"
+PROGNAME="xmllint.sh"
+PROJECTCONF="../project.conf"
 #executables
 DATE="date"
-ECHO="echo"
-PKGCONFIG="pkg-config$EXEEXT"
-UNAME="uname"
-[ $($UNAME -s) != "Darwin" ] || ECHO="/bin/echo"
+DEBUG="_debug"
+ECHO="/bin/echo"
+FIND="find"
+MKDIR="mkdir -p"
+SORT="sort -n"
+TR="tr"
+XMLLINT="xmllint --nonet --xinclude"
+
+[ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 
 #functions
-#date
-_date()
+#xmllint
+_xmllint()
 {
-	if [ -n "$SOURCE_DATE_EPOCH" ]; then
-		TZ=UTC $DATE -d "@$SOURCE_DATE_EPOCH" '+%a %b %d %T %Z %Y'
-	else
-		$DATE
+	res=0
+	subdirs=
+
+	$DATE
+	while read line; do
+		case "$line" in
+			"["*)
+				break
+				;;
+			"subdirs="*)
+				subdirs=${line#subdirs=}
+				subdirs=$(echo "$subdirs" | $TR ',' ' ')
+				;;
+		esac
+	done < "$PROJECTCONF"
+	if [ ! -n "$subdirs" ]; then
+		_error "Could not locate directories to analyze"
+		return $?
 	fi
-}
-
-
-#fail
-_fail()
-{
-	_run "$@" >> "$target"
-}
-
-
-#run
-_run()
-{
-	test="$1"
-	sep=
-	[ $# -eq 1 ] || sep=" "
-
-	shift
-	$ECHO -n "$test:" 1>&2
-	(echo
-	echo "Testing: $test" "$@"
-	testexe="./$test"
-	[ -x "$OBJDIR$test" ] && testexe="$OBJDIR$test"
-	LD_LIBRARY_PATH="$OBJDIR../src" "$testexe" "$@") 2>&1
-	res=$?
-	if [ $res -ne 0 ]; then
-		echo "Test: $test$sep$@: FAIL (error $res)"
-		echo " FAIL" 1>&2
-	else
-		echo "Test: $test$sep$@: PASS"
-		echo " PASS" 1>&2
-	fi
+	for subdir in $subdirs; do
+		[ -d "../$subdir" ] || continue
+		while read filename; do
+			[ -n "$filename" ] || continue
+			echo
+			$ECHO -n "$filename:"
+			$DEBUG $XMLLINT "$filename" 2>&1 > "$DEVNULL"
+			if [ $? -eq 0 ]; then
+				echo " OK"
+				echo "$PROGNAME: $filename: OK" 1>&2
+			else
+				echo "FAIL"
+				echo "$PROGNAME: $filename: FAIL" 1>&2
+				res=2
+			fi
+		done << EOF
+$($FIND "../$subdir" -type f -a \( -iname '*.xml' -o -iname '*.xsl' \) | $SORT)
+EOF
+	done
 	return $res
 }
 
 
-#test
-_test()
+#debug
+_debug()
 {
-	_run "$@" >> "$target"
-	res=$?
-	[ $res -eq 0 ] || FAILED="$FAILED $test(error $res)"
+	echo "$@" 1>&3
+	"$@"
+}
+
+
+#error
+_error()
+{
+	echo "$PROGNAME: $@" 1>&2
+	return 2
 }
 
 
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME [-c][-P prefix]" 1>&2
+	echo "Usage: $PROGNAME [-c] target..." 1>&2
 	return 1
 }
 
@@ -109,7 +123,7 @@ while getopts "cO:P:" name; do
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
 			;;
 		P)
-			#XXX ignored
+			#XXX ignored for compatibility
 			;;
 		?)
 			_usage
@@ -118,22 +132,24 @@ while getopts "cO:P:" name; do
 	esac
 done
 shift $((OPTIND - 1))
-if [ $# -ne 1 ]; then
+if [ $# -lt 1 ]; then
 	_usage
 	exit $?
 fi
-target="$1"
 
-[ "$clean" -ne 0 ]						&& exit 0
+#clean
+[ $clean -ne 0 ] && exit 0
 
-_date > "$target"
-FAILED=
-echo "Performing tests:" 1>&2
-[ -z "$PKG_CONFIG_SYSROOT_DIR" ] && _test "./xml$EXEEXT" \
-	"xml-afl-000000.xmltest"
-echo "Expected failures:" 1>&2
-if [ -n "$FAILED" ]; then
-	echo "Failed tests:$FAILED" 1>&2
-	exit 2
-fi
-echo "All tests completed" 1>&2
+exec 3>&1
+ret=0
+while [ $# -gt 0 ]; do
+	target="$1"
+	dirname="${target%/*}"
+	shift
+
+	if [ -n "$dirname" -a "$dirname" != "$target" ]; then
+		$MKDIR -- "$dirname"				|| ret=$?
+	fi
+	_xmllint > "$target"					|| ret=$?
+done
+exit $ret
